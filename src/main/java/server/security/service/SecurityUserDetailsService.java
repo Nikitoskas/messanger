@@ -1,7 +1,7 @@
 package server.security.service;
 
 
-import lombok.NonNull;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,7 +13,7 @@ import server.database.service.impl.UserServiceImpl;
 import server.security.SecurityUser;
 import server.security.SecurityUserFactory;
 
-import java.util.Optional;
+
 
 
 @Service
@@ -29,11 +29,8 @@ public class SecurityUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found");
         }
         SecurityUser securityUser = SecurityUserFactory.create(user);
-        securityUser.setPassword(new BCryptPasswordEncoder().encode("test"));
+//        securityUser.setPassword(new BCryptPasswordEncoder().encode("test"));
         return securityUser;
     }
 
-    public Optional<SecurityUser> findByUsername(@NonNull String username) {
-        return Optional.ofNullable((SecurityUser) loadUserByUsername(username));
-    }
 }

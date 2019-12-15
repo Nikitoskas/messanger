@@ -1,26 +1,44 @@
 package server.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import server.database.entity.User;
-import server.database.repository.UserRepository;
+import org.springframework.web.bind.annotation.*;
+import server.database.dto.UserDTO;
+import server.database.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import server.database.service.impl.UserServiceImpl;
+import server.security.SecurityUser;
 
 @Controller
 @RestController
-@RequestMapping(path = "api/user")
+@RequestMapping(path = "user")
 public class UserController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserServiceImpl userService;
 
-    @GetMapping("{username}")
-    public User userPage(@PathVariable(name = "username") String username){
-        User user = userRepository.findByUsername((username == null) ? "test" : username);
-        return user;
+    @GetMapping("")
+    public ResponseEntity userPage(@RequestParam(name = "username") String username){
+
+        SecurityUser securityUser = (SecurityUser) SecurityContextHolder.getContext().getAuthentication().getDetails();
+        String authUsername = securityUser.getUsername();
+
+        UserDTO userDTO;
+        if (!authUsername.equalsIgnoreCase(username)) {
+            userDTO = new UserMapper().userToOtherUserDTO(userService.findByUsername(username));
+        } else {
+            userDTO = new UserMapper().ownerUserEntityToUserDTO(userService.findByUsername(username));
+        }
+        return ResponseEntity.ok(userDTO);
+    }
+
+    @RequestMapping("test")
+    public ResponseEntity test(){
+
+        UserDTO userDTO = new UserMapper().ownerUserEntityToUserDTO(userService.findById(6L));
+
+        return ResponseEntity.ok(userDTO);
     }
 
 }

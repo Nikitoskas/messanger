@@ -17,7 +17,8 @@ public final class SecurityUserFactory {
         return  SecurityUser.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .authorities(mapToGrantedAuthorities(user.getRoles()))
+//                .authorities(mapToGrantedAuthorities(user.getRoles()))//insert authorities
+                .authorities(null)//insert authorities
                 .accountNonExpired(true)
                 .accountNonLocked(true)
                 .enabled(true)

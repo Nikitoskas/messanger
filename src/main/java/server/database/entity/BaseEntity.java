@@ -2,9 +2,11 @@ package server.database.entity;
 
 
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.*;
 import java.util.Date;
 
@@ -18,14 +20,19 @@ public class BaseEntity {
     private Long id;
 
     @CreatedDate
-    @Column(name = "created")
+    @CreationTimestamp
+    @Column(name = "created", nullable = false)
     private Date created;
 
     @LastModifiedDate
-    @Column(name = "updated")
+    @CreationTimestamp
+    @Column(name = "updated", nullable = false)
     private Date updated;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private Status status;
+
+
+
 }

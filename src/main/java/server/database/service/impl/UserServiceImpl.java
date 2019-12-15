@@ -1,26 +1,40 @@
 package server.database.service.impl;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import server.database.entity.Chat;
 import server.database.entity.Status;
 import server.database.entity.User;
 
+import server.database.entity.UserChats;
+import server.database.repository.ChatRepository;
+import server.database.repository.UserChatsRepository;
 import server.database.repository.UserRepository;
 import server.database.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
 
     @Autowired
+    private ChatRepository chatRepository;
+
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserChatsRepository userChatsRepository;
 
     @Override
     public User register(User user) {
         user.setStatus(Status.ACTIVE);
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
 
         User registeredUser = userRepository.saveAndFlush(user);
         log.info("IN register - user: {} successfully registered", registeredUser);
@@ -58,5 +72,34 @@ public class UserServiceImpl implements UserService {
     public void delete(Long id) {
         userRepository.deleteById(id);
         log.info("IN delete - user with id: {} successfully deleted", id);
+    }
+
+    @Override
+    public boolean checkEmail(String email) {
+        return userRepository.existsUserByEmail(email);
+    }
+
+    @Override
+    public boolean checkUsername(String username) {
+        return userRepository.existsUserByUsername(username);
+    }
+
+    @Override
+    public List<Chat> findAllChatsByUserId(Long id) {
+        List<UserChats> userChats = userChatsRepository.findAllByUserId(id);
+
+        List<Chat> chats = new ArrayList<>();
+        Chat chat;
+
+        for (UserChats iterator : userChats) {
+            chat = chatRepository.findById(iterator.getChatId()).get();
+            if (Objects.isNull(chat)){
+                System.out.println("Не все чаты загрузились");
+                continue;
+            }
+            chats.add(chat);
+        }
+
+        return chats;
     }
 }

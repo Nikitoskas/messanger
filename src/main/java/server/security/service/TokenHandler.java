@@ -1,17 +1,12 @@
 package server.security.service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import server.security.authentication.AuthException;
 
-import javax.annotation.PostConstruct;
-import java.util.Base64;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TokenHandler {
@@ -22,6 +17,9 @@ public class TokenHandler {
     @Value("${jwt.token.expired}")
     private Long validityInMilliseconds;
 
+    @Value("${jwt.token.header}")
+    private String headerName;
+
     private static final String KEY_USERNAME = "username";
 
 //    @PostConstruct
@@ -29,12 +27,10 @@ public class TokenHandler {
 //        secret = Base64.getEncoder().encodeToString(secret.getBytes());
 //    }
 
-    public Optional<String> extractUsername(String token) {
-
+    public String extractUsername(String token) {
         Jws<Claims> claimsJws = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
         Claims body = claimsJws.getBody();
-        return Optional
-                .ofNullable(body.getSubject());
+        return body.getSubject();
     }
 
     public String createToken(String username) {
@@ -53,6 +49,24 @@ public class TokenHandler {
                 .signWith(SignatureAlgorithm.HS256, secret)//
 //                .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString("snejok".getBytes()))
                 .compact();
+    }
+
+    public boolean validateToken(String token) throws AuthException {
+        try {
+            Jws<Claims> claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+
+            if (claims.getBody().getExpiration().before(new Date())) {
+                return false;
+            }
+
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new AuthException("JWT token is expired or invalid");
+        }
+    }
+
+    public String resolveToken(HttpServletRequest req) {
+        return req.getHeader(headerName);
     }
 
 }

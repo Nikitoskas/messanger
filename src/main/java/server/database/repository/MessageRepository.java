@@ -4,6 +4,9 @@ import server.database.entity.Message;
 import server.database.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface MessageRepository extends JpaRepository<Message, Long> {
-    public Iterable<Message> findAllByAuthor(User author);
+    public List<Message> findAllByAuthor(Long authorId);
+    public List<Message> findAllByChat(Long chatId);
 }

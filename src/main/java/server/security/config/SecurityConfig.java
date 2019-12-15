@@ -38,8 +38,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/gettoken").permitAll()
+                .antMatchers("/auth/**").permitAll()
                 .anyRequest().authenticated();
-        System.out.println("configure done");
     }
 
     @Autowired
