@@ -6,4 +6,5 @@ import lombok.Data;
 public class ChatDTO extends BaseDTO {
     private UserDTO creator;
     private String name;
+    private MessageDTO lastMessage;
 }

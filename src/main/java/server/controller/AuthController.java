@@ -25,6 +25,9 @@ public class AuthController {
     @Autowired
     private UserServiceImpl userService;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @Value("${jwt.token.header}")
     private String tokenHeaderName;
 
@@ -84,7 +87,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Username: " + userDTO.getUsername() + " already registered");
         }
 
-        User user = new UserMapper().userDTOToUserEntity(userDTO);
+        User user = userMapper.userDTOToUserEntity(userDTO);
         User registeredUser = userService.register(user);
 
 

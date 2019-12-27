@@ -19,6 +19,9 @@ public class Chat extends BaseEntity{
     @Column(name = "name")
     private String name;
 
+    @Column(name = "group")
+    private boolean group;
+
 //    @ManyToMany(mappedBy = "chats" , fetch = FetchType.LAZY)
 //    @JoinTable(name = "UserChats",
 //                joinColumns = @JoinColumn(name = "chat_id"),

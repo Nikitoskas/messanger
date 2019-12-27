@@ -1,5 +1,6 @@
 package server.database.service.impl;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import server.database.entity.Chat;
 import server.database.entity.Status;
@@ -13,6 +14,7 @@ import server.database.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import server.security.SecurityUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,5 +103,22 @@ public class UserServiceImpl implements UserService {
         }
 
         return chats;
+    }
+
+    @Override
+    public Long getIdByUsername(String username) {
+        User user = findByUsername(username);
+        return user.getId();
+    }
+
+    @Override
+    public String getAuthUsername(){
+        SecurityUser securityUser = (SecurityUser) SecurityContextHolder.getContext().getAuthentication().getDetails();
+        return securityUser.getUsername();
+    }
+
+    @Override
+    public Long getAuthUserId(){
+        return getIdByUsername(getAuthUsername());
     }
 }

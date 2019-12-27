@@ -11,4 +11,5 @@ public interface MessageService {
     public List<Message> getAllByChatId(Long id);
     public Message findById(Long id);
     public void delete(Long id);
+    public Message getLastMessage(Long chatId);
 }

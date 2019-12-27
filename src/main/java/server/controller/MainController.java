@@ -30,6 +30,9 @@ public class MainController {
     @Autowired
     private TokenHandler tokenHandler;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @RequestMapping("gettoken")
     public ResponseEntity getToken(@RequestParam(value = "login") String login){
 
@@ -64,10 +67,9 @@ public class MainController {
         String username = tokenHandler.extractUsername(token);
 
         User user = userService.findByUsername(username);
-        UserMapper userMapper = new UserMapper();
 
         HashMap<Object, Object> response = new HashMap<>();
-        response.put("user", userMapper.ownerUserEntityToUserDTO(user));
+        response.put("user", userMapper.userEntityToUserDTO(user));
 
 
         return ResponseEntity.ok(response);

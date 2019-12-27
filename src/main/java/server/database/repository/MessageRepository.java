@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
     public List<Message> findAllByAuthor(Long authorId);
-    public List<Message> findAllByChat(Long chatId);
+    public List<Message> findAllByChatOrderByCreated(Long chatId);
+    public Message findFirstByChatOrderByCreatedDesc(Long chatId);
 }

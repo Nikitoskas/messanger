@@ -1,6 +1,8 @@
 package server.database.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import server.database.entity.Message;
 import server.database.entity.Status;
 import server.database.repository.MessageRepository;
@@ -8,6 +10,8 @@ import server.database.service.MessageService;
 
 import java.util.List;
 
+@Service
+@Slf4j
 public class MessageServiceImpl implements MessageService {
 
     @Autowired
@@ -23,31 +27,31 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<Message> getAll() {
-        List<Message> messages = messageRepository.findAll();
-        return messages;
+        return messageRepository.findAll();
     }
 
     @Override
     public List<Message> getAllByAuthorId(Long id) {
-        List<Message> messages = messageRepository.findAllByAuthor(id);
-        return null;
+        return messageRepository.findAllByAuthor(id);
     }
 
     @Override
     public List<Message> getAllByChatId(Long id) {
-        List<Message> messages = messageRepository.findAllByChat(id);
-        return messages;
+        return messageRepository.findAllByChatOrderByCreated(id);
     }
 
     @Override
     public Message findById(Long id) {
-        Message foundedMessage = messageRepository.findById(id).orElse(null);
-        return foundedMessage;
+        return messageRepository.findById(id).orElse(null);
     }
 
     @Override
     public void delete(Long id) {
         messageRepository.deleteById(id);
+    }
 
+    @Override
+    public Message getLastMessage(Long chatId) {
+        return messageRepository.findFirstByChatOrderByCreatedDesc(chatId);
     }
 }

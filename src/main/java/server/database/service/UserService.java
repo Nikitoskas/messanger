@@ -14,5 +14,7 @@ public interface UserService {
     public boolean checkEmail(String email);
     public boolean checkUsername(String username);
     public List<Chat> findAllChatsByUserId(Long id);
-
+    public Long getIdByUsername(String username);
+    public String getAuthUsername();
+    public Long getAuthUserId();
 }

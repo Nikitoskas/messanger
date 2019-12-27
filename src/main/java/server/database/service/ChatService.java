@@ -5,9 +5,12 @@ import server.database.entity.Chat;
 import java.util.List;
 
 public interface ChatService {
-    public Chat create(Chat chat);
-    public List<Chat> getAll();
-    public List<Chat> getAllByUserId(Long id);
-    public Chat findById(Long id);
-    public void delete(Long id);
+    Chat create(Chat chat);
+    List<Chat> getAll();
+    List<Chat> getAllByUserId(Long id);
+    Chat findById(Long id);
+    void delete(Long id);
+    Chat findPrivateChat(Long id1, Long id2);
+
+
 }
