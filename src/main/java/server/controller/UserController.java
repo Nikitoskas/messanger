@@ -19,44 +19,50 @@ import java.util.List;
 @RequestMapping(path = "user")
 public class UserController {
 
-    @Autowired
-    private ChatMapper chatMapper;
+    private final ChatMapper chatMapper;
 
-    @Autowired
-    private UserServiceImpl userService;
+    private final UserServiceImpl userService;
 
-    @Autowired
-    private MessageServiceImpl messageService;
+    private final ChatServiceImpl chatService;
 
-    @Autowired
-    private ChatServiceImpl chatService;
+    private final UserMapper userMapper;
 
-    @Autowired
-    private UserMapper userMapper;
+    public UserController(ChatMapper chatMapper, UserServiceImpl userService, ChatServiceImpl chatService, UserMapper userMapper) {
+        this.chatMapper = chatMapper;
+        this.userService = userService;
+        this.chatService = chatService;
+        this.userMapper = userMapper;
+    }
 
     @GetMapping("")
-    public ResponseEntity userPage(@RequestParam(name = "username") String username){
+    public ResponseEntity userPage(@RequestParam(name = "username", required = false) String username){
 
-        UserDTO userDTO = userMapper.userEntityToUserDTO(userService.findByUsername(username));
+        String authUsername = userService.getAuthUsername();
+        UserDTO userDTO;
+        if (username == null || username.isEmpty() || authUsername.equals(username)){
+            userDTO = userMapper.authUserEntityToDTO(userService.findByUsername(authUsername));
+        } else {
+            userDTO = userMapper.otherUserEntityToDTO(userService.findByUsername(username));
+        }
 
         return ResponseEntity.ok(userDTO);
     }
 
     @RequestMapping("test")
     public ResponseEntity test(){
-
-//        UserDTO userDTO = new UserMapper(userService).ownerUserEntityToUserDTO(userService.findById(6L));
-
-
-
-        return ResponseEntity.ok(chatMapper.standardChatEntityToDTOMapper(chatService.findPrivateChat(6L, 2L)));
+        return ResponseEntity.ok(chatMapper.standardChatMapperEntityToDto(chatService.findPrivateChat(6L, 2L)));
     }
 
     @RequestMapping("chats")
     public ResponseEntity getChats(){
         Long id = userService.getAuthUserId();
-        List<ChatDTO> chats = chatMapper.ListEntityToDTO(userService.findAllChatsByUserId(id));
+        List<ChatDTO> chats = chatMapper.standardListEntityToDTO(userService.findAllChatsByUserId(id));
         return ResponseEntity.ok(chats);
+    }
+
+    @RequestMapping("users")
+    public ResponseEntity getAllUsers(){
+        return ResponseEntity.ok(userMapper.otherUserListEntityToDTO(userService.getAll()));
     }
 
 

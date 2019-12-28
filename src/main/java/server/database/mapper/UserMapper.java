@@ -2,14 +2,11 @@ package server.database.mapper;
 
 
 import lombok.Data;
-import org.modelmapper.Converter;
+import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import server.database.dto.ChatDTO;
 import server.database.dto.UserDTO;
-import server.database.entity.Chat;
 import server.database.entity.User;
 import server.database.service.impl.UserServiceImpl;
 
@@ -19,34 +16,36 @@ import java.util.Objects;
 
 @Component
 @Data
-public class UserMapper extends ModelMapper{
+@NoArgsConstructor
+public class UserMapper{
 
-    @Autowired
     private UserServiceImpl userService;
 
-    public UserDTO userEntityToUserDTO(User user){
+    private ModelMapper authUserMapper;
+    private ModelMapper otherUserMapper;
 
-        String authUsername = userService.getAuthUsername();
-        String username = user.getUsername();
+    @Autowired
+    public UserMapper(UserServiceImpl userService) {
+        this.userService = userService;
 
-        if (!authUsername.equalsIgnoreCase(username)) {
-            setMapperForOtherUser();
-        } else {
-            setMapperForAuthUser();
-        }
-
-
-       return Objects.isNull(user) ? null : this.map(user, UserDTO.class);
-   }
-
-    public UserDTO shortUserEntityToUserDTO(User user){
-        String username = user.getUsername();
-        setMapperForOtherUser();
-        return Objects.isNull(user) ? null : this.map(user, UserDTO.class);
+        this.authUserMapper = initAuthUserMapper();
+        this.otherUserMapper = initOtherUserMapper();
     }
 
-    private void setMapperForOtherUser(){
-        this.createTypeMap(User.class, UserDTO.class)
+    private ModelMapper initAuthUserMapper() {
+        ModelMapper mapper = new ModelMapper();
+        mapper.createTypeMap(User.class, UserDTO.class)
+                .addMappings(mapping -> mapping.skip(UserDTO::setPassword));
+//                .setPostConverter(entityToDTOChatsConverter());
+
+        mapper.createTypeMap(UserDTO.class, User.class);
+
+        return mapper;
+    }
+
+    private ModelMapper initOtherUserMapper() {
+        ModelMapper mapper = new ModelMapper();
+        mapper.createTypeMap(User.class, UserDTO.class)
                 .addMappings(mapping -> {
                     mapping.skip(UserDTO::setPassword);
                     mapping.skip(UserDTO::setEmail);
@@ -55,36 +54,34 @@ public class UserMapper extends ModelMapper{
                     mapping.skip(UserDTO::setUpdated);
                     mapping.skip(UserDTO::setChats);
                 });
+
+        mapper.createTypeMap(UserDTO.class, User.class);
+
+        return mapper;
     }
 
-    private void setMapperForAuthUser(){
-        TypeMap<User, UserDTO> typeMap = this.getTypeMap(User.class, UserDTO.class);
-
-        if (typeMap == null){
-            typeMap = this.createTypeMap(User.class, UserDTO.class);
+    public List<UserDTO> otherUserListEntityToDTO(List<User> users){
+        List<UserDTO> dtoUsers = new ArrayList<>();
+        for (User user : users) {
+            dtoUsers.add(otherUserEntityToDTO(user));
         }
-
-        typeMap.addMappings(mapping -> mapping.skip(UserDTO::setPassword))
-                .setPostConverter(entityToDTOChatsConverter());
+        return dtoUsers;
     }
 
-   private Converter<User, UserDTO> entityToDTOChatsConverter(){
-       return context -> {
-         UserDTO destination = context.getDestination();
-         Long userId = context.getSource().getId();
-         List<Chat> source = userService.findAllChatsByUserId(userId);
-         if (destination.getChats() == null){
-             destination.setChats(new ArrayList<>());
-         }
-         for (Chat iterator : source){
-            destination.getChats().add(map(iterator, ChatDTO.class));
-         }
-         return destination;
-       };
-   }
+    public UserDTO authUserEntityToDTO(User user) {
+        return Objects.isNull(user) ? null : authUserMapper.map(user, UserDTO.class);
+    }
 
-   public User userDTOToUserEntity(UserDTO userDTO){
-       return Objects.isNull(userDTO) ? null : this.map(userDTO, User.class);
-   }
+    public UserDTO otherUserEntityToDTO(User user) {
+        return Objects.isNull(user) ? null : otherUserMapper.map(user, UserDTO.class);
+    }
+
+    public User authUserDtoToEntity(UserDTO userDTO) {
+        return Objects.isNull(userDTO) ? null : authUserMapper.map(userDTO, User.class);
+    }
+
+    public User otherUserDtoToEntity(UserDTO userDTO) {
+        return Objects.isNull(userDTO) ? null : otherUserMapper.map(userDTO, User.class);
+    }
 
 }

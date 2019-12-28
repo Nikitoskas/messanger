@@ -1,6 +1,5 @@
 import org.springframework.beans.factory.annotation.Autowired;
 import server.database.entity.User;
-import server.database.mapper.ChatMapper;
 import server.database.mapper.UserMapper;
 import server.database.service.impl.UserServiceImpl;
 
@@ -20,6 +19,6 @@ public class Test {
 //        user.setUsername("nikita");
 //        user.setPassword("1111");
 //        user.setEmail("4444");
-        System.out.println(userMapper.userEntityToUserDTO(user));
+        System.out.println(userMapper.authUserEntityToDTO(user));
     }
 }

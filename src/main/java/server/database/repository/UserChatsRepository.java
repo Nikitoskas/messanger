@@ -6,6 +6,7 @@ import server.database.entity.UserChats;
 import java.util.List;
 
 public interface UserChatsRepository extends JpaRepository<UserChats, Long> {
-    public List<UserChats> findAllByChatId(Long id);
-    public List<UserChats> findAllByUserId(Long id);
+    List<UserChats> findAllByChatId(Long id);
+    List<UserChats> findAllByUserId(Long id);
+    boolean existsUserChatsByChatIdAndUserId(Long chatId, Long userId);
 }

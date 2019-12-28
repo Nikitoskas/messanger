@@ -1,14 +1,11 @@
 package server.database.mapper;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 import server.database.dto.ChatDTO;
 import server.database.dto.MessageDTO;
 import server.database.entity.Chat;
@@ -21,54 +18,61 @@ import java.util.Objects;
 
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Component
-public class ChatMapper extends ModelMapper{
+@Configuration
+public class ChatMapper{
 
-    @Autowired
     private MessageMapper messageMapper;
-
-    @Autowired
     private MessageServiceImpl messageService;
-
-    @Autowired
     private UserServiceImpl userService;
 
-    public List<ChatDTO> ListEntityToDTO(List<Chat> chats){
+    private ModelMapper standardMapper;
+
+    @Autowired
+    public ChatMapper(MessageMapper messageMapper, MessageServiceImpl messageService, UserServiceImpl userService) {
+        this.messageMapper = messageMapper;
+        this.messageService = messageService;
+        this.userService = userService;
+
+        this.standardMapper = initStandardMapper();
+
+    }
+
+    public List<ChatDTO> standardListEntityToDTO(List<Chat> chats){
         List<ChatDTO> dtoChats = new ArrayList<>();
         for (Chat chat : chats) {
-            dtoChats.add(standardChatEntityToDTOMapper(chat));
+            dtoChats.add(standardChatMapperEntityToDto(chat));
         }
         return dtoChats;
     }
 
 
-    @Bean
-    public ChatDTO standardChatEntityToDTOMapper(Chat chat){
-        TypeMap<Chat, ChatDTO> typeMap = this.getTypeMap(Chat.class, ChatDTO.class);
+    public ChatDTO standardChatMapperEntityToDto(Chat chat){
+        return Objects.isNull(chat) ? null : standardMapper.map(chat, ChatDTO.class);
+    }
 
-        if (typeMap == null){
-            typeMap = this.createTypeMap(Chat.class, ChatDTO.class);
-        }
+    private ModelMapper initStandardMapper(){
+        ModelMapper mapper = new ModelMapper();
+        mapper.createTypeMap(Chat.class, ChatDTO.class)
+                .setPostConverter(standardConverter());
 
-        typeMap.setPostConverter(standardConverter());
+        mapper.createTypeMap(ChatDTO.class, Chat.class);
 
-        return Objects.isNull(chat) ? null : this.map(chat, ChatDTO.class);
+        return mapper;
     }
 
     private Converter<Chat, ChatDTO> standardConverter(){
         return context -> {
           ChatDTO destination = context.getDestination();
           Long chatId = context.getSource().getId();
-          MessageDTO lastMessage = messageMapper.entityToDTO(messageService.getLastMessage(chatId));
+          MessageDTO lastMessage = messageMapper.standardEntityToDTO(messageService.getLastMessage(chatId));
           destination.setLastMessage(lastMessage);
           return destination;
         };
     }
 
-    public Chat dtoToEntity(ChatDTO chatDTO){
-        return Objects.isNull(chatDTO) ? null : this.map(chatDTO, Chat.class);
+    public Chat standardDtoToEntity(ChatDTO chatDTO){
+        return Objects.isNull(chatDTO) ? null : standardMapper.map(chatDTO, Chat.class);
     }
 
 }

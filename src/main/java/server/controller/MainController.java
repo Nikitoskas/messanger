@@ -17,21 +17,24 @@ import server.security.service.TokenHandler;
 
 
 @RestController
-public class MainController {
-    @Autowired
-    private UserRepository userRepository;
+public class MainController {//no used class
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UserServiceImpl userService;
+    private final UserServiceImpl userService;
 
-    @Autowired
-    private MessageRepository messageRepository;
+    private final MessageRepository messageRepository;
 
-    @Autowired
-    private TokenHandler tokenHandler;
+    private final TokenHandler tokenHandler;
 
-    @Autowired
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
+
+    public MainController(UserRepository userRepository, UserServiceImpl userService, MessageRepository messageRepository, TokenHandler tokenHandler, UserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.userService = userService;
+        this.messageRepository = messageRepository;
+        this.tokenHandler = tokenHandler;
+        this.userMapper = userMapper;
+    }
 
     @RequestMapping("gettoken")
     public ResponseEntity getToken(@RequestParam(value = "login") String login){
@@ -69,7 +72,7 @@ public class MainController {
         User user = userService.findByUsername(username);
 
         HashMap<Object, Object> response = new HashMap<>();
-        response.put("user", userMapper.userEntityToUserDTO(user));
+        response.put("user", userMapper.authUserEntityToDTO(user));
 
 
         return ResponseEntity.ok(response);

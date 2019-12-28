@@ -19,17 +19,20 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("auth")
 public class AuthController {
 
-    @Autowired
-    private TokenHandler tokenHandler;
+    private final TokenHandler tokenHandler;
 
-    @Autowired
-    private UserServiceImpl userService;
+    private final UserServiceImpl userService;
 
-    @Autowired
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
 
     @Value("${jwt.token.header}")
     private String tokenHeaderName;
+
+    public AuthController(TokenHandler tokenHandler, UserServiceImpl userService, UserMapper userMapper) {
+        this.tokenHandler = tokenHandler;
+        this.userService = userService;
+        this.userMapper = userMapper;
+    }
 
 
     @RequestMapping(value = "gettoken")
@@ -66,7 +69,7 @@ public class AuthController {
 
     }
 
-    @RequestMapping(value = "reg")
+    @RequestMapping(value = "registration")
     public ResponseEntity registration(
             @RequestBody(required = false) UserDTO userDTO
     ){
@@ -87,7 +90,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Username: " + userDTO.getUsername() + " already registered");
         }
 
-        User user = userMapper.userDTOToUserEntity(userDTO);
+        User user = userMapper.authUserDtoToEntity(userDTO);
         User registeredUser = userService.register(user);
 
 

@@ -23,11 +23,15 @@ import server.security.service.TokenAuthService;
 @ComponentScan("server.security.service")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private TokenAuthService tokenAuthService;
+    private final TokenAuthService tokenAuthService;
 
-    @Autowired
-    private SecurityUserDetailsService securityUserDetailsService;
+    private final SecurityUserDetailsService securityUserDetailsService;
+
+    public SecurityConfig(TokenAuthService tokenAuthService, SecurityUserDetailsService securityUserDetailsService) {
+        this.tokenAuthService = tokenAuthService;
+        this.securityUserDetailsService = securityUserDetailsService;
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http

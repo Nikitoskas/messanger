@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import server.database.entity.Chat;
 import server.database.entity.Status;
+import server.database.entity.UserChats;
 import server.database.repository.ChatRepository;
+import server.database.repository.UserChatsRepository;
 import server.database.service.ChatService;
 
 import java.util.List;
@@ -14,35 +16,37 @@ import java.util.List;
 @Slf4j
 public class ChatServiceImpl implements ChatService {
 
-    @Autowired
-    private ChatRepository chatRepository;
+    private final ChatRepository chatRepository;
+
+    private final UserChatsRepository userChatsRepository;
+
+    public ChatServiceImpl(ChatRepository chatRepository, UserChatsRepository userChatsRepository) {
+        this.chatRepository = chatRepository;
+        this.userChatsRepository = userChatsRepository;
+    }
 
     @Override
     public Chat create(Chat chat) {
 
         chat.setStatus(Status.ACTIVE);
 
-        Chat createdChat = chatRepository.saveAndFlush(chat);
-        return createdChat;
+        return chatRepository.saveAndFlush(chat);
     }
 
     @Override
     public List<Chat> getAll() {
-        List<Chat> chats = chatRepository.findAll();
-        return chats;
+        return chatRepository.findAll();
     }
 
     @Override
     public List<Chat> getAllByUserId(Long id) {
-        List<Chat> chats = chatRepository.findAllByCreatorEquals(id);
 
-        return chats;
+        return chatRepository.findAllByCreatorEquals(id);
     }
 
     @Override
     public Chat findById(Long id) {
-        Chat foundedChat = chatRepository.findById(id).orElse(null);
-        return foundedChat;
+        return chatRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -53,6 +57,25 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Chat findPrivateChat(Long id1, Long id2) {
         Long chatId = chatRepository.getPrivateChatIdByUsers(id1, id2);
-        return chatRepository.findById(chatId).get();
+        return chatRepository.findById(chatId).orElse(null);
+    }
+
+    @Override
+    public boolean chatExists(Long id) {
+        return chatRepository.existsChatById(id);
+    }
+
+    @Override
+    public boolean checkAccess(Long chatId, Long userId) {
+        return userChatsRepository.existsUserChatsByChatIdAndUserId(chatId, userId);
+    }
+
+    @Override
+    public void addUserToChat(Long userId, Long chatId) {
+        UserChats userChats = new UserChats();
+        userChats.setChatId(chatId);
+        userChats.setUserId(userId);
+        userChats.setStatus(Status.ACTIVE);
+        userChatsRepository.saveAndFlush(userChats);
     }
 }
