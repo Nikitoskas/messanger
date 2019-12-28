@@ -2,6 +2,7 @@ package server.database.entity;
 
 
 import lombok.Data;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.List;
@@ -19,8 +20,9 @@ public class Chat extends BaseEntity{
     @Column(name = "name")
     private String name;
 
-    @Column(name = "group")
-    private boolean group;
+    @Column(name = "isGroup", nullable = false)
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    private Boolean group;
 
 //    @ManyToMany(mappedBy = "chats" , fetch = FetchType.LAZY)
 //    @JoinTable(name = "UserChats",
