@@ -1,7 +1,5 @@
 package server.database.mapper;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +11,12 @@ import server.database.service.impl.UserServiceImpl;
 
 import java.util.Objects;
 @Component
-@Data
-@NoArgsConstructor
+//@Data
+//@NoArgsConstructor
 public class MessageMapper{
 
     private UserServiceImpl userService;
     private UserMapper userMapper;
-
     private ModelMapper standardMapper;
 
 
@@ -27,7 +24,6 @@ public class MessageMapper{
     public MessageMapper(UserServiceImpl userService, UserMapper userMapper) {
         this.userService = userService;
         this.userMapper = userMapper;
-
         this.standardMapper = initStandardMapper();
     }
 
@@ -45,17 +41,17 @@ public class MessageMapper{
         return context -> {
             MessageDTO destination = context.getDestination();
             User author = userService.findById(context.getSource().getAuthor());
-            destination.setAuthor(userMapper.otherUserEntityToDTO(author));
+            destination.setAuthor(userMapper.mapNoAuthUserEntityToDTO(author));
             return destination;
         };
     }
 
 
-    public MessageDTO standardEntityToDTO(Message message){
+    public MessageDTO mapStandardEntityToDTO(Message message){
         return Objects.isNull(message) ? null : standardMapper.map(message, MessageDTO.class);
     }
 
-    public Message standardDtoToEntity(MessageDTO messageDTO){
+    public Message mapStandardDtoToEntity(MessageDTO messageDTO){
         return Objects.isNull(messageDTO) ? null : standardMapper.map(messageDTO, Message.class);
     }
 

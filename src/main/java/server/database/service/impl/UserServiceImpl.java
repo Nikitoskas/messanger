@@ -6,9 +6,9 @@ import server.database.entity.Chat;
 import server.database.entity.Status;
 import server.database.entity.User;
 
-import server.database.entity.UserChats;
+import server.database.entity.UserToChat;
 import server.database.repository.ChatRepository;
-import server.database.repository.UserChatsRepository;
+import server.database.repository.UserToChatRepository;
 import server.database.repository.UserRepository;
 import server.database.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private UserChatsRepository userChatsRepository;
+    private UserToChatRepository userToChatRepository;
 
     @Override
     public User register(User user) {
@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
 
         User registeredUser = userRepository.saveAndFlush(user);
-        log.info("IN register - user: {} successfully registered", registeredUser);
+        log.trace("IN register - user: {} successfully registered", registeredUser);
 
         return registeredUser;
     }
@@ -47,14 +47,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAll() {
         List<User> result = userRepository.findAll();
-        log.info("IN getAll - {} users found", result.size());
+        log.trace("IN getAll - {} users found", result.size());
         return result;
     }
 
     @Override
     public User findByUsername(String username) {
         User result = userRepository.findByUsername(username);
-        log.info("IN findByLogin - user {} found by login {}", result, username);
+        if (result == null) {
+            log.warn("IN findByLogin - user not found by login {}", username);
+            return null;
+        }
+        log.trace("IN findByLogin - user {} found by login {}", result, username);
         return result;
     }
 
@@ -66,37 +70,37 @@ public class UserServiceImpl implements UserService {
             log.warn("IN findById - user not found by id: {}", id);
             return null;
         }
-        log.info("IN findById - user {} found by id", result);
+        log.trace("IN findById - user {} found by id", result);
         return result;
     }
 
     @Override
     public void delete(Long id) {
         userRepository.deleteById(id);
-        log.info("IN delete - user with id: {} successfully deleted", id);
+        log.trace("IN delete - user with id: {} successfully deleted", id);
     }
 
     @Override
-    public boolean checkEmail(String email) {
+    public boolean isEmailValid(String email) {
         return userRepository.existsUserByEmail(email);
     }
 
     @Override
-    public boolean checkUsername(String username) {
+    public boolean isUsernameValid(String username) {
         return userRepository.existsUserByUsername(username);
     }
 
     @Override
     public List<Chat> findAllChatsByUserId(Long id) {
-        List<UserChats> userChats = userChatsRepository.findAllByUserId(id);
+        List<UserToChat> userChats = userToChatRepository.findAllByUserId(id);
 
         List<Chat> chats = new ArrayList<>();
         Chat chat;
 
-        for (UserChats iterator : userChats) {
+        for (UserToChat iterator : userChats) {
             chat = chatRepository.findById(iterator.getChatId()).get();
             if (Objects.isNull(chat)){
-                System.out.println("Не все чаты загрузились");
+                log.trace("chat not download");
                 continue;
             }
             chats.add(chat);

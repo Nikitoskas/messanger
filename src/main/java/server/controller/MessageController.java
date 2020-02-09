@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import server.database.entity.Chat;
 import server.database.entity.Message;
 import server.database.mapper.MessageMapper;
@@ -18,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @Controller
-@RestController
 @RequestMapping(path = "message")
 public class MessageController {
 
@@ -40,7 +38,7 @@ public class MessageController {
         this.userMapper = userMapper;
     }
 
-    @RequestMapping("send")
+    @RequestMapping("sending")
     public ResponseEntity send(@RequestBody Message body){
 
         if (body == null){
@@ -62,7 +60,7 @@ public class MessageController {
         return ResponseEntity.ok(HttpServletResponse.SC_OK);
     }
 
-    @RequestMapping("sendtouser")
+    @RequestMapping("sending-to-user")
     public ResponseEntity sendToUser(@RequestBody Map<String, String> body){
         if (body == null){
             return ResponseEntity.badRequest().body("body not found");
@@ -72,12 +70,12 @@ public class MessageController {
         String receiverUsername = body.get("receiver_login");
 
         if (text == null || receiverUsername == null){
-            return ResponseEntity.badRequest().body("required data not found");
+            return ResponseEntity.badRequest().body("required data (text) not found");
         }
 
         Long receiverId = userService.getIdByUsername(receiverUsername);
         Long authUserId = userService.getAuthUserId();
-        if (!userService.checkUsername(receiverUsername)){
+        if (!userService.isUsernameValid(receiverUsername)){
             return ResponseEntity.badRequest().body("user not registered");
         }
 

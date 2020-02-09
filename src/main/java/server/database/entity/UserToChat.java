@@ -11,7 +11,7 @@ import javax.persistence.Table;
 @Entity
 @Data
 @Table(name = "user_chats")
-public class UserChats extends BaseEntity {
+public class UserToChat extends BaseEntity {
 
     @Column(name = "user_id")
     private Long userId;

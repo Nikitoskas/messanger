@@ -3,26 +3,32 @@ package server.database.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import server.database.dto.ChatDTO;
 import server.database.entity.Chat;
 import server.database.entity.Status;
-import server.database.entity.UserChats;
+import server.database.entity.UserToChat;
 import server.database.repository.ChatRepository;
-import server.database.repository.UserChatsRepository;
+import server.database.repository.UserToChatRepository;
 import server.database.service.ChatService;
 
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Service
 @Slf4j
 public class ChatServiceImpl implements ChatService {
 
+    @Autowired
+    private UserServiceImpl userService;
+
     private final ChatRepository chatRepository;
 
-    private final UserChatsRepository userChatsRepository;
+    private final UserToChatRepository userToChatRepository;
 
-    public ChatServiceImpl(ChatRepository chatRepository, UserChatsRepository userChatsRepository) {
+    public ChatServiceImpl(ChatRepository chatRepository, UserToChatRepository userToChatRepository) {
         this.chatRepository = chatRepository;
-        this.userChatsRepository = userChatsRepository;
+        this.userToChatRepository = userToChatRepository;
     }
 
     @Override
@@ -31,6 +37,43 @@ public class ChatServiceImpl implements ChatService {
         chat.setStatus(Status.ACTIVE);
 
         return chatRepository.saveAndFlush(chat);
+    }
+
+    @Override
+    public Chat create(ChatDTO chat) {
+
+        List<String> users;
+        Set<Long> usersId = new TreeSet<>();
+        String chatName;
+
+        users = chat.getMembers();
+        chatName = chat.getName();
+
+        for (Object entry : users) {
+            String username = (String) entry;
+            if (!userService.isUsernameValid(username)) {
+                return null;
+            }
+            usersId.add(userService.getIdByUsername(username));
+        }
+
+        boolean group = (usersId.size() > 1);
+        Long authUserId = userService.getAuthUserId();
+
+        Chat newChat = new Chat();
+        newChat.setGroup(group);
+        newChat.setCreatorId(authUserId);
+        newChat.setName(chatName);
+        newChat = create(newChat);
+
+        Long chatId = newChat.getId();
+
+        addUserToChat(authUserId, chatId);
+        for (Long id: usersId) {
+            addUserToChat(id, chatId);
+        }
+
+        return newChat;
     }
 
     @Override
@@ -67,15 +110,15 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public boolean checkAccess(Long chatId, Long userId) {
-        return userChatsRepository.existsUserChatsByChatIdAndUserId(chatId, userId);
+        return userToChatRepository.existsUserChatsByChatIdAndUserId(chatId, userId);
     }
 
     @Override
     public void addUserToChat(Long userId, Long chatId) {
-        UserChats userChats = new UserChats();
-        userChats.setChatId(chatId);
-        userChats.setUserId(userId);
-        userChats.setStatus(Status.ACTIVE);
-        userChatsRepository.saveAndFlush(userChats);
+        UserToChat userToChat = new UserToChat();
+        userToChat.setChatId(chatId);
+        userToChat.setUserId(userId);
+        userToChat.setStatus(Status.ACTIVE);
+        userToChatRepository.saveAndFlush(userToChat);
     }
 }

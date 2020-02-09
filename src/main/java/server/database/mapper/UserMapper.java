@@ -2,7 +2,6 @@ package server.database.mapper;
 
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,11 +15,10 @@ import java.util.Objects;
 
 @Component
 @Data
-@NoArgsConstructor
+//@NoArgsConstructor
 public class UserMapper{
 
     private UserServiceImpl userService;
-
     private ModelMapper authUserMapper;
     private ModelMapper otherUserMapper;
 
@@ -29,7 +27,7 @@ public class UserMapper{
         this.userService = userService;
 
         this.authUserMapper = initAuthUserMapper();
-        this.otherUserMapper = initOtherUserMapper();
+        this.otherUserMapper = initNoAuthUserMapper();
     }
 
     private ModelMapper initAuthUserMapper() {
@@ -43,7 +41,7 @@ public class UserMapper{
         return mapper;
     }
 
-    private ModelMapper initOtherUserMapper() {
+    private ModelMapper initNoAuthUserMapper() {
         ModelMapper mapper = new ModelMapper();
         mapper.createTypeMap(User.class, UserDTO.class)
                 .addMappings(mapping -> {
@@ -60,27 +58,27 @@ public class UserMapper{
         return mapper;
     }
 
-    public List<UserDTO> otherUserListEntityToDTO(List<User> users){
+    public List<UserDTO> mapNoAuthUserListEntityToDTO(List<User> users){
         List<UserDTO> dtoUsers = new ArrayList<>();
         for (User user : users) {
-            dtoUsers.add(otherUserEntityToDTO(user));
+            dtoUsers.add(mapNoAuthUserEntityToDTO(user));
         }
         return dtoUsers;
     }
 
-    public UserDTO authUserEntityToDTO(User user) {
+    public UserDTO mapAuthUserEntityToDTO(User user) {
         return Objects.isNull(user) ? null : authUserMapper.map(user, UserDTO.class);
     }
 
-    public UserDTO otherUserEntityToDTO(User user) {
+    public UserDTO mapNoAuthUserEntityToDTO(User user) {
         return Objects.isNull(user) ? null : otherUserMapper.map(user, UserDTO.class);
     }
 
-    public User authUserDtoToEntity(UserDTO userDTO) {
+    public User mapAuthUserDtoToEntity(UserDTO userDTO) {
         return Objects.isNull(userDTO) ? null : authUserMapper.map(userDTO, User.class);
     }
 
-    public User otherUserDtoToEntity(UserDTO userDTO) {
+    public User mapNoAuthUserDtoToEntity(UserDTO userDTO) {
         return Objects.isNull(userDTO) ? null : otherUserMapper.map(userDTO, User.class);
     }
 

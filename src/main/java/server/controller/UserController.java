@@ -5,17 +5,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import server.database.dto.ChatDTO;
 import server.database.dto.UserDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import server.database.mapper.ChatMapper;
 import server.database.mapper.UserMapper;
 import server.database.service.impl.ChatServiceImpl;
-import server.database.service.impl.MessageServiceImpl;
 import server.database.service.impl.UserServiceImpl;
 
 import java.util.List;
 
 @Controller
-@RestController
 @RequestMapping(path = "user")
 public class UserController {
 
@@ -35,14 +32,14 @@ public class UserController {
     }
 
     @GetMapping("")
-    public ResponseEntity userPage(@RequestParam(name = "username", required = false) String username){
+    public ResponseEntity getUser(@RequestParam(name = "username", required = false) String username){
 
         String authUsername = userService.getAuthUsername();
         UserDTO userDTO;
         if (username == null || username.isEmpty() || authUsername.equals(username)){
-            userDTO = userMapper.authUserEntityToDTO(userService.findByUsername(authUsername));
+            userDTO = userMapper.mapAuthUserEntityToDTO(userService.findByUsername(authUsername));
         } else {
-            userDTO = userMapper.otherUserEntityToDTO(userService.findByUsername(username));
+            userDTO = userMapper.mapNoAuthUserEntityToDTO(userService.findByUsername(username));
         }
 
         return ResponseEntity.ok(userDTO);
@@ -50,19 +47,19 @@ public class UserController {
 
     @RequestMapping("test")
     public ResponseEntity test(){
-        return ResponseEntity.ok(chatMapper.standardChatMapperEntityToDto(chatService.findPrivateChat(6L, 2L)));
+        return ResponseEntity.ok(chatMapper.mapStandardChatMapperEntityToDto(chatService.findPrivateChat(6L, 2L)));
     }
 
     @RequestMapping("chats")
     public ResponseEntity getChats(){
         Long id = userService.getAuthUserId();
-        List<ChatDTO> chats = chatMapper.standardListEntityToDTO(userService.findAllChatsByUserId(id));
+        List<ChatDTO> chats = chatMapper.mapStandardListEntityToDTO(userService.findAllChatsByUserId(id));
         return ResponseEntity.ok(chats);
     }
 
     @RequestMapping("users")
     public ResponseEntity getAllUsers(){
-        return ResponseEntity.ok(userMapper.otherUserListEntityToDTO(userService.getAll()));
+        return ResponseEntity.ok(userMapper.mapNoAuthUserListEntityToDTO(userService.getAll()));
     }
 
 

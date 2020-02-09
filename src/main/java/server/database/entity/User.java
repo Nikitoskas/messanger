@@ -26,7 +26,7 @@ public class User extends BaseEntity {
     private String email;
 
 //    @ManyToMany(fetch = FetchType.LAZY)
-//    @JoinTable(name = "UserChats",
+//    @JoinTable(name = "UserToChat",
 //            joinColumns = @JoinColumn(name = "user_id"),
 //            inverseJoinColumns = @JoinColumn(name = "chat_id"))
 //    private List<Long> chats;

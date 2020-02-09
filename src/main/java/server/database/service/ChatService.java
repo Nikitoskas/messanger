@@ -1,5 +1,6 @@
 package server.database.service;
 
+import server.database.dto.ChatDTO;
 import server.database.entity.Chat;
 import server.database.entity.User;
 
@@ -7,6 +8,7 @@ import java.util.List;
 
 public interface ChatService {
     Chat create(Chat chat);
+    Chat create(ChatDTO chat);
     List<Chat> getAll();
     List<Chat> getAllByUserId(Long id);
     Chat findById(Long id);

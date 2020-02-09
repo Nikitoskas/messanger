@@ -2,9 +2,12 @@ package server.database.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ChatDTO extends BaseDTO {
-    private UserDTO creator;
+    private UserDTO creatorId;
     private String name;
     private MessageDTO lastMessage;
+    private List<String> members;
 }

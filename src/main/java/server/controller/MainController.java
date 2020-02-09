@@ -8,7 +8,6 @@ import server.database.entity.User;
 import server.database.mapper.UserMapper;
 import server.database.repository.MessageRepository;
 import server.database.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -72,7 +71,7 @@ public class MainController {//no used class
         User user = userService.findByUsername(username);
 
         HashMap<Object, Object> response = new HashMap<>();
-        response.put("user", userMapper.authUserEntityToDTO(user));
+        response.put("user", userMapper.mapAuthUserEntityToDTO(user));
 
 
         return ResponseEntity.ok(response);

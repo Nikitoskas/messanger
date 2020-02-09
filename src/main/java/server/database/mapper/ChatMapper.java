@@ -1,7 +1,5 @@
 package server.database.mapper;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +15,8 @@ import java.util.List;
 import java.util.Objects;
 
 
-@Data
-@NoArgsConstructor
+//@Data
+//@NoArgsConstructor
 @Configuration
 public class ChatMapper{
 
@@ -38,34 +36,34 @@ public class ChatMapper{
 
     }
 
-    public List<ChatDTO> standardListEntityToDTO(List<Chat> chats){
+    public List<ChatDTO> mapStandardListEntityToDTO(List<Chat> chats){
         List<ChatDTO> dtoChats = new ArrayList<>();
         for (Chat chat : chats) {
-            dtoChats.add(standardChatMapperEntityToDto(chat));
+            dtoChats.add(mapStandardChatMapperEntityToDto(chat));
         }
         return dtoChats;
     }
 
 
-    public ChatDTO standardChatMapperEntityToDto(Chat chat){
+    public ChatDTO mapStandardChatMapperEntityToDto(Chat chat){
         return Objects.isNull(chat) ? null : standardMapper.map(chat, ChatDTO.class);
     }
 
     private ModelMapper initStandardMapper(){
         ModelMapper mapper = new ModelMapper();
         mapper.createTypeMap(Chat.class, ChatDTO.class)
-                .setPostConverter(standardConverter());
+                .setPostConverter(initStandardConverter());
 
         mapper.createTypeMap(ChatDTO.class, Chat.class);
 
         return mapper;
     }
 
-    private Converter<Chat, ChatDTO> standardConverter(){
+    private Converter<Chat, ChatDTO> initStandardConverter(){
         return context -> {
           ChatDTO destination = context.getDestination();
           Long chatId = context.getSource().getId();
-          MessageDTO lastMessage = messageMapper.standardEntityToDTO(messageService.getLastMessage(chatId));
+          MessageDTO lastMessage = messageMapper.mapStandardEntityToDTO(messageService.getLastMessage(chatId));
           destination.setLastMessage(lastMessage);
           return destination;
         };
